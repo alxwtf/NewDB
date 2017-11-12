@@ -1,0 +1,101 @@
+﻿@using System.Linq.Expressions
+@using NewDB.Models
+
+@{
+//Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>LinqTest</title>
+</head>
+<body>
+    <div>
+        <h3>Список фирм по отраслям</h3>
+        <h4>Связь</h4>
+        <table border="1">
+            <tr>
+                <td>
+                    <p>Название</p>
+                </td>
+                <td>
+                    <p>E-mail</p>
+                </td>
+                <td>
+                    <p>Телефон</p>
+                </td>
+                <td>
+                    <p>Сайт</p>
+                </td>
+            </tr>
+            @{
+                CompanyContext context = new CompanyContext();
+                var comp = from t1 in context.companies
+                           join t2 in context.contacts on t1.CompanyId equals t2.CompanyId
+                           where (t1.industry == "Связь")
+                           select new { t1.Name, t2.phone, t2.email, t2.site };
+                foreach (var t in comp)
+                {
+                    <tr>
+                        <td>
+                            <p>@t.Name</p>
+                        </td>
+                        <td>
+                            <p>@t.phone</p>
+                        </td>
+                        <td>
+                            <p>@t.email</p>
+                        </td>
+                        <td>
+                            <p>@t.site</p>
+                        </td>
+                    </tr>
+                }
+            }
+        </table>
+        <h4>Перевозки</h4>
+        <table border="1">
+            <tr>
+                <td>
+                    <p>Название</p>
+                </td>
+                <td>
+                    <p>E-mail</p>
+                </td>
+                <td>
+                    <p>Телефон</p>
+                </td>
+                <td>
+                    <p>Сайт</p>
+                </td>
+            </tr>
+            @{
+                comp = from t1 in context.companies
+                       join t2 in context.contacts on t1.CompanyId equals t2.CompanyId
+                       where (t1.industry == "Перевозки")
+                       select new { t1.Name, t2.phone, t2.email, t2.site };
+                foreach (var k in comp)
+                {
+                    <tr>
+                        <td>
+                            <p>@k.Name</p>
+                        </td>
+                        <td>
+                            <p>@k.phone</p>
+                        </td>
+                        <td>
+                            <p>@k.email</p>
+                        </td>
+                        <td>
+                            <p>@k.site</p>
+                        </td>
+                    </tr>
+                }
+            }
+        </table>
+    </div>
+</body>
+</html>

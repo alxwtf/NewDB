@@ -1,31 +1,42 @@
-﻿@{
-    ViewBag.Title = "Home Page";
+﻿@using NewDB.Models
+@{
+    //Layout = null;
+    ViewBag.Title = "Список компаний";
 }
+<!DOCTYPE html>
 
-<div class="jumbotron">
-    <h1>ASP.NET</h1>
-    <p class="lead">ASP.NET is a free web framework for building great Web sites and Web applications using HTML, CSS and JavaScript.</p>
-    <p><a href="https://asp.net" class="btn btn-primary btn-lg">Learn more &raquo;</a></p>
-</div>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Список компаний</title>
+</head>
+<body>
+    <div>
+        <h3>Список компаний</h3>
+        <table border="1">
+            <tr>
+                <td><p>Название</p></td>
+                <td><p>E-mail</p></td>
+                <td><p>Телефон</p></td>
+                <td><p>Сайт</p></td>
+            </tr>
+            @{CompanyContext dbContext = new CompanyContext();
+                var query = from t1 in dbContext.companies
+                    join t2 in dbContext.contacts on t1.CompanyId equals t2.CompanyId
+                    select new {t1.Name, t2.email, t2.phone, t2.site, t1.industry,t1.CompanyId};
 
-<div class="row">
-    <div class="col-md-4">
-        <h2>Getting started</h2>
-        <p>
-            ASP.NET MVC gives you a powerful, patterns-based way to build dynamic websites that
-            enables a clean separation of concerns and gives you full control over markup
-            for enjoyable, agile development.
-        </p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301865">Learn more &raquo;</a></p>
+
+                foreach (var b in query)
+            {
+                <tr>
+                    <td><p>@b.Name</p></td>
+                    <td><p>@b.email</p></td>
+                    <td><p>@b.phone</p></td>
+                    <td><p>@b.site</p></td>
+                </tr>
+            }
+            }
+        </table>
     </div>
-    <div class="col-md-4">
-        <h2>Get more libraries</h2>
-        <p>NuGet is a free Visual Studio extension that makes it easy to add, remove, and update libraries and tools in Visual Studio projects.</p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301866">Learn more &raquo;</a></p>
-    </div>
-    <div class="col-md-4">
-        <h2>Web Hosting</h2>
-        <p>You can easily find a web hosting company that offers the right mix of features and price for your applications.</p>
-        <p><a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301867">Learn more &raquo;</a></p>
-    </div>
-</div>
+</body>
+</html>
