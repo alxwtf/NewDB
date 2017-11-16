@@ -1,55 +1,62 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.Entity;
 using System.Linq;
+using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using NewDB.Models;
+
 
 namespace NewDB.Controllers
 {
     public class HomeController : Controller
     {
-        CompanyContext db = new CompanyContext();
+        private CompanyContext db = new CompanyContext();
 
         public ActionResult Index()
         {
-            return View();
+            var contacts = db.contacts.Include(c => c.Company);
+            return View(contacts.ToList());
         }
 
         public ActionResult DBWork()
         {
-            return View();
+            var contacts = db.contacts.Include(c => c.Company);
+            return View(contacts.ToList());
         }
         public ActionResult LinqQuery()
         {
             return View();
         }
-        [HttpPost]
-        public void Edit(int? id, string name, string email, string phone, string site, string action, string industry)
+
+        public JsonResult Edit(int? id, string name, string email, string phone, string site, string action, string industry)
         {
             Company company = db.companies.Where(x => x.CompanyId == id).FirstOrDefault();
             Contact contact = db.contacts.Where(x => x.CompanyId == id).FirstOrDefault();
-            if (action == "remove")
+            var comp = new Company();
+            if (action == "add")
+            {
+                comp = new Company
+                {
+                    Name = name,
+                    industry = industry,
+                    Contacts = new List<Contact>
+                    {
+                        new Contact
+                        {
+                            email = email,
+                            phone=phone,
+                            site=site
+                        }
+                    }
+                };
+                db.companies.Add(comp);
+            }
+            else if (action == "remove")
             {
                 db.companies.Remove(company);
-            }
-            else if (action == "add")
-            {
-                company = new Company()
-            {
-                Name = name,
-                industry = industry,
-                Contacts = new List<Contact>
-                {
-                    new Contact
-                    {
-                        email = email,
-                        phone=phone,
-                        site=site
-                    }
-                }
-            };
-            db.companies.Add(company);
             }
             else if (action == "update")
             {
@@ -60,7 +67,7 @@ namespace NewDB.Controllers
                 if (industry != "") company.industry = industry;
             }
             db.SaveChanges();
-            Response.Redirect("/Home/DBWork");
+            return new JsonResult{Data = comp.CompanyId};
         }
     }
 }

@@ -1,42 +1,317 @@
-﻿@using NewDB.Models
+﻿@model IEnumerable<NewDB.Models.Contact>
 @{
     //Layout = null;
-    ViewBag.Title = "Список компаний";
+    ViewBag.Title = "Работа с БД";
 }
-<!DOCTYPE html>
 
 <html>
 <head>
     <meta name="viewport" content="width=device-width" />
     <title>Список компаний</title>
+    <style>
+        h3 {
+            color: red;
+            text-align: center;
+        }
+
+        table.first {
+            margin: auto;
+        }
+
+        table.second {
+            margin: auto;
+            background: coral;
+        }
+
+        table.third {
+            margin: auto;
+            margin-top: 20px;
+            background: goldenrod;
+        }
+    </style>
 </head>
 <body>
     <div>
         <h3>Список компаний</h3>
-        <table border="1">
-            <tr>
-                <td><p>Название</p></td>
-                <td><p>E-mail</p></td>
-                <td><p>Телефон</p></td>
-                <td><p>Сайт</p></td>
-            </tr>
-            @{CompanyContext dbContext = new CompanyContext();
-                var query = from t1 in dbContext.companies
-                    join t2 in dbContext.contacts on t1.CompanyId equals t2.CompanyId
-                    select new {t1.Name, t2.email, t2.phone, t2.site, t1.industry,t1.CompanyId};
+        <form name="edit" , id="edit">
 
-
-                foreach (var b in query)
-            {
+            <table border="1" id="tbl" class="first">
                 <tr>
-                    <td><p>@b.Name</p></td>
-                    <td><p>@b.email</p></td>
-                    <td><p>@b.phone</p></td>
-                    <td><p>@b.site</p></td>
+                    <td hidden name="selectcol"><p></p> </td>
+                    <td>
+                        <p>Название</p>
+                    </td>
+                    <td>
+                        <p>E-mail</p>
+                    </td>
+                    <td>
+                        <p>Телефон</p>
+                    </td>
+                    <td>
+                        <p>Сайт</p>
+                    </td>
+                    <td>
+                        <p>Отрасль</p>
+                    </td>
                 </tr>
-            }
-            }
-        </table>
+                <tbody>
+                @{
+                    foreach (var item in Model)
+                    {
+                        <tr name="rows">
+                            <td hidden name="selectcol"><input type="radio" value="@item.Company.CompanyId" name="id" /></td>
+                            <td name="nm">@item.Company.Name</td>
+                            <td>@item.email</td>
+                            <td>@item.phone</td>
+                            <td>@item.site</td>
+                            <td>@item.Company.industry</td>
+                        </tr>
+                    }
+                }
+                </tbody>
+            </table>
+            <hr>
+            <table class="second" id="edt" hidden>
+                <tr>
+                    <td>
+                        Имя:
+                    </td>
+                    <td><input type="text" name="name" id="name" /></td>
+                </tr>
+                <tr>
+                    <td>
+                        Email:
+                    </td>
+                    <td><input type="text" name="email" id="email" /></td>
+                </tr>
+                <tr>
+                    <td>
+                        Телефон:
+                    </td>
+                    <td><input type="text" name="phone" id="phone" /></td>
+                </tr>
+                <tr>
+                    <td>Сайт:</td>
+                    <td>
+                        <input type="text" name="site" id="site" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>Отрасль:</td>
+                    <td>
+                        <select name="industry" required="">
+                            <option>
+                                Связь
+                            </option>
+                            <option>
+                                Перевозки
+                            </option>
+                            <option>
+                                Коммерция
+                            </option>
+                            <option>
+                                Развлечение
+                            </option>
+                            <option>
+                                Строительство
+                            </option>
+                        </select>
+                    </td>
+                </tr>
+            </table>
+            <table class="third">
+                <tr id="buttons" hidden>
+                    <td><button name="action" , value="add" id="add" type="button">Добавить</button></td>
+                    <td><button name="action" , value="remove" id="rem" type="button">Удалить</button></td>
+                    <td><button name="action" , value="update" id="upd" type="button">Обновить</button></td>
+                </tr>
+            </table>
+        </form>
+        <div align="center" style="margin-top: 10px">
+            <button name="action" , id="show">Показать</button>
+            <button name="action" , id="hide" hidden>Скрыть</button>
+        </div>
     </div>
 </body>
 </html>
+@section scripts
+{
+    <script>
+        $("#rem").on("click",
+            function() {
+                if (!$(':input[name=id]:checked').val()) {
+                    alert("Не выбрана запись для удаления");
+                    return false;
+                } else {
+                    var data = $(':input[name=id]:checked').val();
+                    var action = 'remove';
+                    var obj = {
+                        id: data,
+                        action: action
+                    };
+                };
+                $.ajax({
+                    type: 'POST',
+                    url: '/Home/Edit',
+                    data: JSON.stringify(obj),
+                    contentType: 'application/json; charset=UTF-8',
+                    success: function(response) {
+                        console.log(response);
+                        $('tr[name=rows]').eq($(':radio:checked').closest('tr').index() - 1).remove();
+                    },
+                    error: function(response) {
+                        console.log(response);
+                    }
+                });
+            });
+        $("#add").on("click",
+            function() {
+                if ($('#name').val() == '') {
+                    alert("Введите недостающие данные");
+                    return false;
+                } else {
+                    $(':radio').prop('checked', false);
+                    var data = $('#edit').serializeArray();
+                    var action = 'add';
+                    var obj = {
+                        name: data[0].value,
+                        email: data[1].value,
+                        phone: data[2].value,
+                        site: data[3].value,
+                        industry: data[4].value,
+                        action: action
+                    };
+                    $.ajax({
+                        type: 'POST',
+                        url: '/Home/Edit',
+                        data: JSON.stringify(obj),
+                        contentType: 'application/json; charset=UTF-8',
+                        success: function(response) {
+                            console.log(response);
+                            obj.Id = response;
+                            $('#tbl').append(createRow(obj));
+                            $('input:text').val('');
+                        },
+                        error: function(response) {
+                            console.log(response);
+                        }
+                    });
+                }
+            });
+        $("#upd").on("click",
+            function() {
+                if (!$(':input[name=id]:checked').val()) {
+                    alert("Не выбрана запись для замены");
+                    return false;
+                } else {
+                    var data = $('#edit').serializeArray();
+                    var action = 'update';
+                    var obj = {
+                        id: data[0].value,
+                        name: data[1].value,
+                        email: data[2].value,
+                        phone: data[3].value,
+                        site: data[4].value,
+                        industry: data[5].value,
+                        action: action
+                    };
+                    $.ajax({
+                        type: 'POST',
+                        url: '/Home/Edit',
+                        data: JSON.stringify(obj),
+                        contentType: 'application/json; charset=UTF-8',
+                        success: function(response) {
+                            console.log(response);
+                            obj.Id = response;
+                            $('tr[name=rows]').eq($(':radio:checked').closest('tr').index() - 1).html(updateRow(obj));
+                            $('input:text').val('');
+                        },
+                        error: function(response) {
+                            console.log(response);
+                        }
+                    });
+                }
+            });
+
+        function createRow(company) {
+            return '<tr name=rows>' +
+                '<td name="selectcol"><input type="radio" value="' +
+                company.Id +
+                '" name="id"/></td>' +
+                '<td name=nm>' +
+                company.name +
+                '</td>' +
+                '<td>' +
+                company.email +
+                '</td>' +
+                '<td>' +
+                company.phone +
+                '</td>' +
+                '<td>' +
+                company.site +
+                '</td>' +
+                '<td>' +
+                company.industry +
+                '</td>' +
+                '</tr>';
+        };
+
+        function updateRow(company) {
+            return '<td name=selectcol><input type="radio" value=' +
+                company.Id +
+                ' name="id" id="id"/></td> ' +
+                '<td name=nm>' +
+                company.name +
+                '</td>' +
+                '<td>' +
+                company.email +
+                '</td>' +
+                '<td>' +
+                company.phone +
+                '</td>' +
+                '<td>' +
+                company.site +
+                '</td>' +
+                '<td>' +
+                company.industry +
+                '</td>';
+        };
+
+        $('#show').on('click',
+            function() {
+                $('#buttons').show();
+                $('#edt').show();
+                $('td[name=selectcol]').show();
+                $('#show').hide();
+                $('#hide').show();
+            })
+        $('#hide').on('click',
+            function() {
+                $('#buttons').hide();
+                $('#edt').hide();
+                $('td[name=selectcol]').hide();
+                $('#show').show();
+                $('#hide').hide();
+            });
+        $('table').delegate('[name=id]',
+            'change',
+            function() {
+                $('input[name=name]').val($(':radio:checked').closest('tr').find('td').eq(1).text()),
+                    $('input[name=email]').val($(':radio:checked').closest('tr').find('td').eq(2).text()),
+                    $('input[name=phone]').val($(':radio:checked').closest('tr').find('td').eq(3).text()),
+                    $('input[name=site]').val($(':radio:checked').closest('tr').find('td').eq(4).text());
+            });
+        $("#showsearch").on('click',
+            function () {
+                $('#srch').show();
+                $('#hidesearch').show();
+                $(this).hide();
+            });
+        $("#hidesearch").on('click',
+            function () {
+                $('#srch').hide();
+                $(this).hide();
+                $('#showsearch').show();
+            });
+    </script>
+}

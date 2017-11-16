@@ -1,0 +1,89 @@
+﻿@using NewDB.Models
+@using System.Data.Entity
+@model IEnumerable<NewDB.Models.Contact>
+
+@{
+    //Layout = null;
+    ViewBag.Title = "Список компаний";
+}
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Список компаний</title>
+</head>
+<body>
+<div>
+    <h3>Список компаний</h3>
+    <table border="1" id="tbl">
+        <tr>
+            <td><p>Название</p></td>
+            <td><p>E-mail</p></td>
+            <td><p>Телефон</p></td>
+            <td><p>Сайт</p></td>
+        </tr>
+        <tbody>
+        @{
+            foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Company.Name</td>
+                    <td>@item.email</td>
+                    <td>@item.phone</td>
+                    <td>@item.site</td>
+                </tr>
+            }
+        }
+        </tbody>
+    </table>
+    <input type="text" name="Search" id="Search">
+</div>
+</body>
+</html>
+@section scripts
+{
+    <script>
+        $('#Search').on('keyup paste',
+            function () {
+                console.log($(this).val());
+                var obj = {
+                    searchName: $(this).val()
+                };
+                $.ajax({
+                    type: 'POST',
+                    url: '/Home/Search',
+                    data: JSON.stringify(obj),
+                    contentType: 'application/json; charset=UTF-8',
+                    success: function (response) {
+                        console.log(response);
+                        var trHtml = response.map(function (el) {
+                            return createRow(el);
+                        }).join("");
+                        $('#tbl tbody').html(trHtml);
+                    },
+                    error: function (response) {
+                        console.log(response);
+                    }
+                });
+            });
+        function createRow(company) {
+            return '<tr name=rows>' +
+                '<td name=nm>' +
+                company.name +
+                '</td>' +
+                '<td>' +
+                company.email +
+                '</td>' +
+                '<td>' +
+                company.phone +
+                '</td>' +
+                '<td>' +
+                company.site +
+                '</td>' +
+                '<td>' +
+                company.industry +
+                '</td>' +
+                '</tr>';
+        }
+    </script>
+}
