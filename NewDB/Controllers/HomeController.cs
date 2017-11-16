@@ -64,5 +64,11 @@ namespace NewDB.Controllers
             db.SaveChanges();
             return new JsonResult{Data = comp.CompanyId};
         }
+
+        public JsonResult Search(string SearchName)
+        {
+            var comp = db.companies.Where(x => x.Name.Contains(SearchName)).ToList();
+            return new JsonResult{Data=comp};
+        }
     }
 }

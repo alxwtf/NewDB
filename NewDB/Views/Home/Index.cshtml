@@ -36,6 +36,7 @@
         <form name="edit" , id="edit">
 
             <table border="1" id="tbl" class="first">
+                <thead>
                 <tr>
                     <td hidden name="selectcol"><p></p> </td>
                     <td>
@@ -54,6 +55,7 @@
                         <p>Отрасль</p>
                     </td>
                 </tr>
+                </thead>
                 <tbody>
                 @{
                     foreach (var item in Model)
@@ -131,6 +133,7 @@
             <button name="action" , id="show">Показать</button>
             <button name="action" , id="hide" hidden>Скрыть</button>
         </div>
+        <input class="form-control" style="margin: 15px" id="Search" name="Search" type="text" />
     </div>
 </body>
 </html>
@@ -157,7 +160,7 @@
                     contentType: 'application/json; charset=UTF-8',
                     success: function(response) {
                         console.log(response);
-                        $('tr[name=rows]').eq($(':radio:checked').closest('tr').index() - 1).remove();
+                        $('tr[name=rows]').eq($(':radio:checked').closest('tr').index()).remove();
                     },
                     error: function(response) {
                         console.log(response);
@@ -223,7 +226,7 @@
                         success: function(response) {
                             console.log(response);
                             obj.Id = response;
-                            $('tr[name=rows]').eq($(':radio:checked').closest('tr').index() - 1).html(updateRow(obj));
+                            $('tr[name=rows]').eq($(':radio:checked').closest('tr').index()).html(updateRow(obj));
                             $('input:text').val('');
                         },
                         error: function(response) {
@@ -302,16 +305,67 @@
                     $('input[name=site]').val($(':radio:checked').closest('tr').find('td').eq(4).text());
             });
         $("#showsearch").on('click',
-            function () {
+            function() {
                 $('#srch').show();
                 $('#hidesearch').show();
                 $(this).hide();
             });
         $("#hidesearch").on('click',
-            function () {
+            function() {
                 $('#srch').hide();
                 $(this).hide();
                 $('#showsearch').show();
             });
+        $('#Search').on('keyup paste',
+            function() {
+                if ($(this).val()!= '') {
+                    console.log($(this).val());
+                    var obj = {
+                        searchName: $(this).val()
+                    }
+                    $.ajax({
+                        type: 'POST',
+                        url: '/Home/Search',
+                        data: JSON.stringify(obj),
+                        contentType: 'application/json; charset=UTF-8',
+                        success: function(response) {
+                            console.log(response);
+                            var trHtml = response.map(function(el) {
+                                return createTr(el);
+                            }).join("");
+                            $('[name=selectcol]').show();
+                            $('#tbl tbody').html(trHtml);
+                        },
+                        error: function(response) {
+                            console.log(response);
+                        }
+                    });
+                }
+                else {
+                    $('[name=selectcol]').hide();
+                }
+            });
+
+        function createTr(company) {
+            return '<tr name=rows>' +
+                '<td name="selectcol hidden"><input type="radio" value="' +
+                company.Id +
+                '" name="id"/></td>' +
+                '<td name=nm>' +
+                company.Name +
+                '</td>' +
+                '<td>' +
+                company.email +
+                '</td>' +
+                '<td>' +
+                company.phone +
+                '</td>' +
+                '<td>' +
+                company.site +
+                '</td>' +
+                '<td>' +
+                company.industry +
+                '</td></tr>'
+        }
     </script>
 }
