@@ -20,15 +20,10 @@ namespace NewDB.Controllers
             var contacts = db.contacts.Include(c => c.Company);
             return View(contacts.ToList());
         }
-
-        public ActionResult DBWork()
+        public ActionResult LinqQuery()
         {
             var contacts = db.contacts.Include(c => c.Company);
             return View(contacts.ToList());
-        }
-        public ActionResult LinqQuery()
-        {
-            return View();
         }
 
         public JsonResult Edit(int? id, string name, string email, string phone, string site, string action, string industry)

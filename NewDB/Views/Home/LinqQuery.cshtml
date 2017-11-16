@@ -1,5 +1,5 @@
 ﻿@using System.Linq.Expressions
-@using NewDB.Models
+@model IEnumerable<NewDB.Models.Contact>
 
 @{
 //Layout = null;
@@ -31,12 +31,9 @@
                     <p>Сайт</p>
                 </td>
             </tr>
-            @{
-                CompanyContext context = new CompanyContext();
-                var comp = from t1 in context.companies
-                           join t2 in context.contacts on t1.CompanyId equals t2.CompanyId
-                           where (t1.industry == "Связь")
-                           select new { t1.Name, t2.phone, t2.email, t2.site };
+            @{var comp = from t1 in Model
+                           where (t1.Company.industry=="Связь")
+                           select new { t1.Company.Name, t1.phone, t1.email, t1.site };
                 foreach (var t in comp)
                 {
                     <tr>
@@ -72,11 +69,9 @@
                     <p>Сайт</p>
                 </td>
             </tr>
-            @{
-                comp = from t1 in context.companies
-                       join t2 in context.contacts on t1.CompanyId equals t2.CompanyId
-                       where (t1.industry == "Перевозки")
-                       select new { t1.Name, t2.phone, t2.email, t2.site };
+            @{comp = from t1 in Model
+                  where (t1.Company.industry=="Перевозки")
+                  select new { t1.Company.Name, t1.phone, t1.email, t1.site };
                 foreach (var k in comp)
                 {
                     <tr>
