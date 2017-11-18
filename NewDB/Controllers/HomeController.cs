@@ -13,8 +13,8 @@ namespace NewDB.Controllers
 {
     public class HomeController : Controller
     {
-        private CompanyContext db = new CompanyContext();
-
+        private static CompanyContext db = new CompanyContext();
+        private IEnumerable<Contact> contacts = db.contacts.Include(c => c.Company);
         public ActionResult Index()
         {
             var contacts = db.contacts.Include(c => c.Company);
@@ -67,8 +67,12 @@ namespace NewDB.Controllers
 
         public JsonResult Search(string SearchName)
         {
-            var comp = db.companies.Where(x => x.Name.Contains(SearchName)).ToList();
-            return new JsonResult{Data=comp};
+                var query = from t1 in db.companies
+                    join t2 in db.contacts on t1.CompanyId equals t2.CompanyId
+                    where (t1.Name.Contains(SearchName))
+                    select new {t1.Name, t2.email, t2.phone, t2.site, t1.industry};
+                var comp = query.ToList();
+                return new JsonResult {Data = comp};
         }
     }
 }

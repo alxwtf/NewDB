@@ -56,7 +56,7 @@
                     </td>
                 </tr>
                 </thead>
-                <tbody>
+                <tbody id="tableBody">
                 @{
                     foreach (var item in Model)
                     {
@@ -130,8 +130,8 @@
             </table>
         </form>
         <div align="center" style="margin-top: 10px">
-            <button name="action" , id="show">Показать</button>
-            <button name="action" , id="hide" hidden>Скрыть</button>
+            <button name="action" , id="show" onclick="show()">Показать</button>
+            <button name="action" , id="hide" hidden onclick="hide()">Скрыть</button>
         </div>
         <input class="form-control" style="margin: 15px" id="Search" name="Search" type="text" />
     </div>
@@ -280,22 +280,22 @@
                 '</td>';
         };
 
-        $('#show').on('click',
-            function() {
-                $('#buttons').show();
-                $('#edt').show();
-                $('td[name=selectcol]').show();
-                $('#show').hide();
-                $('#hide').show();
-            })
-        $('#hide').on('click',
-            function() {
-                $('#buttons').hide();
-                $('#edt').hide();
-                $('td[name=selectcol]').hide();
-                $('#show').show();
-                $('#hide').hide();
-            });
+        function show() {
+            $('#buttons').show();
+            $('#edt').show();
+            $('td[name=selectcol]').show();
+            $('#show').hide();
+            $('#hide').show();
+        };
+
+        function hide() {
+            $('#buttons').hide();
+            $('#edt').hide();
+            $('td[name=selectcol]').hide();
+            $('#show').show();
+            $('#hide').hide();
+        };
+
         $('table').delegate('[name=id]',
             'change',
             function() {
@@ -318,11 +318,12 @@
             });
         $('#Search').on('keyup paste',
             function() {
-                if ($(this).val()!= '') {
+                    hide();
                     console.log($(this).val());
-                    var obj = {
-                        searchName: $(this).val()
+                var obj = {
+                    searchName: $(this).val(),
                     }
+                console.log(obj);
                     $.ajax({
                         type: 'POST',
                         url: '/Home/Search',
@@ -333,22 +334,17 @@
                             var trHtml = response.map(function(el) {
                                 return createTr(el);
                             }).join("");
-                            $('[name=selectcol]').show();
                             $('#tbl tbody').html(trHtml);
                         },
                         error: function(response) {
                             console.log(response);
                         }
                     });
-                }
-                else {
-                    $('[name=selectcol]').hide();
-                }
             });
 
         function createTr(company) {
             return '<tr name=rows>' +
-                '<td name="selectcol hidden"><input type="radio" value="' +
+                '<td name="selectcol" hidden><input type="radio" value="' +
                 company.Id +
                 '" name="id"/></td>' +
                 '<td name=nm>' +
@@ -365,7 +361,7 @@
                 '</td>' +
                 '<td>' +
                 company.industry +
-                '</td></tr>'
+                '</td></tr>';
         }
     </script>
 }
