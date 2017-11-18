@@ -133,7 +133,9 @@
             <button name="action" , id="show" onclick="show()">Показать</button>
             <button name="action" , id="hide" hidden onclick="hide()">Скрыть</button>
         </div>
-        <input class="form-control" style="margin: 15px" id="Search" name="Search" type="text" />
+        <input style="margin: 15px" id="Search" name="Search" type="text" hidden/>
+        <button name="action" , id="showsearch">Показать поиск</button>
+        <button name="action" , id="hidesearch" hidden>Скрыть поиск</button>
     </div>
 </body>
 </html>
@@ -306,13 +308,13 @@
             });
         $("#showsearch").on('click',
             function() {
-                $('#srch').show();
+                $('#Search').show();
                 $('#hidesearch').show();
                 $(this).hide();
             });
         $("#hidesearch").on('click',
             function() {
-                $('#srch').hide();
+                $('#Search').hide();
                 $(this).hide();
                 $('#showsearch').show();
             });
